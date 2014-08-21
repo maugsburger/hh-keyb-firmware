@@ -27,14 +27,13 @@
 
 static struct DebounceKeys
 {
-  enum { BUFSIZE = NUM_ROWS * NUM_COLS };
-  uint8_t count[BUFSIZE];
+  uint8_t count[NUM_CELLS];
 } self;
 
 void
 DebounceKeys__init()
 {
-  memset(&self.count[0], 0, BUFSIZE);
+  memset(&self.count[0], 0, NUM_CELLS);
 }
 
 bool

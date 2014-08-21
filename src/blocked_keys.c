@@ -26,15 +26,14 @@
 
 static struct BlockedKeys
 {
-  enum { BUFSIZE = NUM_ROWS * NUM_COLS };
-  bool keys[BUFSIZE];
+  bool keys[NUM_CELLS];
 } self;
 
 
 void
 BlockedKeys__init()
 {
-  memset(&self.keys[0], 0, BUFSIZE);
+  memset(&self.keys[0], 0, NUM_CELLS);
 }
 
 void

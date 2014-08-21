@@ -29,6 +29,7 @@
 
 #define NUM_ROWS <%= kb.matrix.row_count %>
 #define NUM_COLS <%= kb.matrix.col_count %>
+#define NUM_CELLS <%= kb.matrix.col_count * kb.matrix.row_count %>
 
 struct Cell
 {
