@@ -1,7 +1,7 @@
 #ifndef __KEYBOARDREPORT_H__
 #define __KEYBOARDREPORT_H__
 
-#include <LUFA/Drivers/USB/Class/HID.h>
+#include <LUFA/Drivers/USB/Class/HIDClass.h>
 #include "hid_usages.h"
 
 struct KeyboardReport

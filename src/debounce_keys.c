@@ -23,6 +23,7 @@
 
 */
 
+#include <string.h>
 #include "debounce_keys.h"
 
 static struct DebounceKeys

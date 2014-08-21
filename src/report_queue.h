@@ -35,7 +35,7 @@ typedef uint16_t RQ_elem_t;
 #else
 
 #include "keyboard_report.h"
-#include <LUFA/Drivers/USB/Class/HID.h>
+#include <LUFA/Drivers/USB/Class/HIDClass.h>
 typedef KeyboardReport RQ_elem_t;
 
 #endif

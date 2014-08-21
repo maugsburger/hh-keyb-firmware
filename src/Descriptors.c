@@ -158,7 +158,7 @@ USB_Descriptor_Device_t const PROGMEM DeviceDescriptor =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
-	.USBSpecification       = VERSION_BCD(01.10),
+	.USBSpecification       = VERSION_BCD(1,10,0),
 	.Class                  = 0x00,
 	.SubClass               = 0x00,
 	.Protocol               = 0x00,
@@ -193,7 +193,7 @@ USB_Descriptor_Configuration_t const PROGMEM ConfigurationDescriptor =
 			.ConfigurationNumber    = 1,
 			.ConfigurationStrIndex  = NO_DESCRIPTOR,
 
-			.ConfigAttributes       = (USB_CONFIG_ATTR_BUSPOWERED | USB_CONFIG_ATTR_REMOTEWAKEUP),
+			.ConfigAttributes       = (USB_CONFIG_ATTR_REMOTEWAKEUP),
 
 			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
 		},
@@ -207,21 +207,21 @@ USB_Descriptor_Configuration_t const PROGMEM ConfigurationDescriptor =
 
 			.TotalEndpoints         = 1,
 
-			.Class                  = 0x03,
-			.SubClass               = 0x01,
-			.Protocol               = HID_BOOT_KEYBOARD_PROTOCOL,
+			.Class                  = HID_CSCP_HIDClass,
+			.SubClass               = HID_CSCP_BootSubclass,
+			.Protocol               = HID_CSCP_KeyboardBootProtocol,
 
 			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
 
 	.HID_KeyboardHID =
 		{
-			.Header                 = {.Size = sizeof(USB_HID_Descriptor_t), .Type = DTYPE_HID},
+			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
-			.HIDSpec                = VERSION_BCD(01.11),
+			.HIDSpec                = VERSION_BCD(1,11,0),
 			.CountryCode            = 0x00,
 			.TotalReportDescriptors = 1,
-			.HIDReportType          = DTYPE_Report,
+			.HIDReportType          = HID_DTYPE_Report,
 			.HIDReportLength        = sizeof(KeyboardReport)
 		},
 
@@ -229,11 +229,12 @@ USB_Descriptor_Configuration_t const PROGMEM ConfigurationDescriptor =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-			.EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_IN | KEYBOARD_EPNUM),
+			.EndpointAddress        = (ENDPOINT_DIR_IN | KEYBOARD_EPNUM),
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 			.EndpointSize           = KEYBOARD_EPSIZE,
 			.PollingIntervalMS      = 0x0A
 		},
+
     .HIDDBG_Interface =
       {
         .Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
@@ -252,12 +253,12 @@ USB_Descriptor_Configuration_t const PROGMEM ConfigurationDescriptor =
 
     .HIDDBG_HID =
       {
-        .Header                 = {.Size = sizeof(USB_HID_Descriptor_t), .Type = DTYPE_HID},
+        .Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
-        .HIDSpec                = VERSION_BCD(01.11),
+        .HIDSpec                = VERSION_BCD(1,11,0),
         .CountryCode            = 0x00,
         .TotalReportDescriptors = 1,
-        .HIDReportType          = DTYPE_Report,
+        .HIDReportType          = HID_DTYPE_Report,
         .HIDReportLength        = sizeof(DBGReport)
       },
 
@@ -265,7 +266,7 @@ USB_Descriptor_Configuration_t const PROGMEM ConfigurationDescriptor =
       {
         .Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-        .EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_IN | DBG_EPNUM),
+        .EndpointAddress        = (ENDPOINT_DIR_IN | DBG_EPNUM),
         .Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
         .EndpointSize           = DBG_EPSIZE,
         .PollingIntervalMS      = 0x0A
@@ -290,7 +291,7 @@ USB_Descriptor_Configuration_t const PROGMEM ConfigurationDescriptor =
       {
         .Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-        .EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_IN | PRG_EPNUM),
+        .EndpointAddress        = (ENDPOINT_DIR_IN | PRG_EPNUM),
         .Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
         .EndpointSize           = PRG_EPSIZE,
         .PollingIntervalMS      = 0x00 /* ignored for full-speed bulk transfers */
@@ -336,7 +337,9 @@ USB_Descriptor_String_t const PROGMEM ProductString =
  *  is called so that the descriptor details can be passed back and the appropriate descriptor sent back to the
  *  USB host.
  */
-uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, void** const DescriptorAddress)
+uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
+                                    const uint8_t wIndex,
+                                    const void** const DescriptorAddress)
 {
 	const uint8_t  DescriptorType   = (wValue >> 8);
 	const uint8_t  DescriptorNumber = (wValue & 0xFF);
@@ -372,20 +375,20 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
 			}
 
 			break;
-    case DTYPE_HID:
+    case HID_DTYPE_HID:
       switch (wIndex)
       {
         case 0:
           Address = (void*)&ConfigurationDescriptor.HID_KeyboardHID;
-          Size    = sizeof(USB_HID_Descriptor_t);
+          Size    = sizeof(USB_HID_Descriptor_HID_t);
           break;
         case 1:
           Address = (void*)&ConfigurationDescriptor.HIDDBG_HID;
-          Size    = sizeof(USB_HID_Descriptor_t);
+          Size    = sizeof(USB_HID_Descriptor_HID_t);
           break;
       }
 			break;
-    case DTYPE_Report:
+    case HID_DTYPE_Report:
       switch (wIndex)
       {
         case 0:

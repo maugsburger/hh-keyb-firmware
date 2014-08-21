@@ -67,11 +67,12 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
     .Config =
       {
         .InterfaceNumber              = 0,
-
-        .ReportINEndpointNumber       = KEYBOARD_EPNUM,
-        .ReportINEndpointSize         = KEYBOARD_EPSIZE,
-        .ReportINEndpointDoubleBank   = false,
-
+        .ReportINEndpoint             =
+            {
+                .Address              = KEYBOARD_EPNUM,
+                .Size                 = KEYBOARD_EPSIZE,
+                .Banks                = 1,
+            },
         .PrevReportINBuffer           = PrevKeyboardHIDReportBuffer,
         .PrevReportINBufferSize       = sizeof(PrevKeyboardHIDReportBuffer),
       },
@@ -84,11 +85,12 @@ USB_ClassInfo_HID_Device_t DBG_HID_Interface =
     .Config =
       {
         .InterfaceNumber              = 1,
-
-        .ReportINEndpointNumber       = DBG_EPNUM,
-        .ReportINEndpointSize         = DBG_EPSIZE,
-        .ReportINEndpointDoubleBank   = false,
-
+        .ReportINEndpoint             =
+            {
+                .Address              = DBG_EPNUM,
+                .Size                 = DBG_EPSIZE,
+                .Banks                = 1,
+            },
         .PrevReportINBuffer           = PrevDBGHIDReportBuffer,
         .PrevReportINBufferSize       = sizeof(PrevDBGHIDReportBuffer),
       },
@@ -144,7 +146,7 @@ int main(void)
 
       PRG_Device_USBTask();
     }
-    else if (USB_RemoteWakeupEnabled && Keyboard__key_is_down())
+    else if (USB_Device_RemoteWakeupEnabled && Keyboard__key_is_down())
     {
       USB_CLK_Unfreeze();
       USB_Device_SendRemoteWakeup();
@@ -214,11 +216,11 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 
   if (!(HID_Device_ConfigureEndpoints(&DBG_HID_Interface)))
     LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-
+/* FIXME re-add programming endpoint
   if (!(Endpoint_ConfigureEndpoint(PRG_EPNUM, EP_TYPE_BULK, ENDPOINT_DIR_IN,
                                    PRG_EPSIZE, ENDPOINT_BANK_SINGLE)))
     LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-
+*/
   USB_Device_EnableSOFEvents();
 }
 

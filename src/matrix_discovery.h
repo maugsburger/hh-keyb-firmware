@@ -24,7 +24,7 @@
 #ifndef __MATRIX_DISCOVERY_H__
 #define __MATRIX_DISCOVERY_H__
 
-#include <LUFA/Drivers/USB/Class/HID.h>
+#include <LUFA/Drivers/USB/Class/HIDClass.h>
 
 #include "matrix_discovery_defs.h"
 

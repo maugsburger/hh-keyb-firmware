@@ -52,7 +52,7 @@
 
 		#include <LUFA/Drivers/USB/USB.h>
 
-		#include <LUFA/Drivers/USB/Class/HID.h>
+		#include <LUFA/Drivers/USB/Class/HIDClass.h>
 
 	/* Type Defines: */
 		/** Type define for the device configuration descriptor structure. This must be defined in the
@@ -63,10 +63,10 @@
 		{
 			USB_Descriptor_Configuration_Header_t Config;
 			USB_Descriptor_Interface_t            HID_Interface;
-			USB_HID_Descriptor_t                  HID_KeyboardHID;
+			USB_HID_Descriptor_HID_t                  HID_KeyboardHID;
 	        USB_Descriptor_Endpoint_t             HID_ReportINEndpoint;
       USB_Descriptor_Interface_t            HIDDBG_Interface;
-      USB_HID_Descriptor_t                  HIDDBG_HID;
+      USB_HID_Descriptor_HID_t                  HIDDBG_HID;
           USB_Descriptor_Endpoint_t             HIDDBG_ReportINEndpoint;
       USB_Descriptor_Interface_t            Programming_Interface;
          USB_Descriptor_Endpoint_t             Programming_ReportINEndpoint;
@@ -93,8 +93,5 @@
      *  OUT endpoints. */
 		#define PRG_EPSIZE                   64
 
-	/* Function Prototypes: */
-		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, void** const DescriptorAddress)
-		                           ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
 
 #endif

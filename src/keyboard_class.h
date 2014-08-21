@@ -24,7 +24,7 @@
 #ifndef __KEYBOARD_CLASS_H__
 #define __KEYBOARD_CLASS_H__
 
-#include <LUFA/Drivers/USB/Class/HID.h>
+#include <LUFA/Drivers/USB/Class/HIDClass.h>
 
 void      Keyboard__init(void);
 uint8_t   Keyboard__get_report(USB_KeyboardReport_Data_t *report);

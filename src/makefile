@@ -81,9 +81,10 @@ SRCDIR = ../src
 VPATH = .. $(OBJDIR)
 
 # Path to the LUFA library
-LUFA_PATH = ../lufa-100513
+LUFA_PATH = ../lufa/
 
 # LUFA library compile-time options
+F_USB = $(F_CPU)
 LUFA_OPTS  = -D USB_DEVICE_ONLY
 LUFA_OPTS += -D FIXED_CONTROL_ENDPOINT_SIZE=8
 LUFA_OPTS += -D FIXED_NUM_CONFIGURATIONS=1
@@ -93,19 +94,19 @@ LUFA_OPTS += -D USE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENAB
 # Generated files directory
 GENERATED = generated
 
-LUFA_SRC = $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/DevChapter9.c       \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Endpoint.c          \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Host.c              \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/HostChapter9.c      \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/LowLevel.c          \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Pipe.c              \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/USBInterrupt.c      \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/ConfigDescriptor.c \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/Events.c           \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/USBTask.c          \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/Class/Device/HID.c           \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/Class/Host/HID.c             \
-	   $(LUFA_PATH)/LUFA/Drivers/USB/Class/Host/HIDParser.c       
+LUFA_SRC = \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/Device_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/Endpoint_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/EndpointStream_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/Pipe_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/PipeStream_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/USBController_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/AVR8/USBInterrupt_AVR8.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/ConfigDescriptors.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/DeviceStandardReq.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/Events.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Core/USBTask.c \
+	$(LUFA_PATH)/LUFA/Drivers/USB/Class/Device/HIDClassDevice.c
 
 # List C source files here. (C dependencies are automatically generated.)
 ifndef MATRIX_MODE
@@ -173,7 +174,7 @@ CSTANDARD = -std=gnu99
 
 
 # Place -D or -U options here for C sources
-CDEFS  = -DF_CPU=$(F_CPU)UL -DF_CLOCK=$(F_CLOCK)UL -DBOARD=BOARD_$(BOARD) $(LUFA_OPTS)
+CDEFS  = -DF_USB=$(F_USB)UL -DF_CPU=$(F_CPU)UL -DF_CLOCK=$(F_CLOCK)UL -DBOARD=BOARD_$(BOARD) $(LUFA_OPTS)
 CDEFS += $(HH_DEFS)
 
 
@@ -466,17 +467,6 @@ sizebefore:
 sizeafter:
 	@if test -f $(TARGET).elf; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE); \
 	2>/dev/null; echo; fi
-
-$(LUFA_PATH)/LUFA/LUFA_Events.lst:
-	@$(MAKE) -C $(LUFA_PATH)/LUFA/ LUFA_Events.lst
-
-checkinvalidevents: $(LUFA_PATH)/LUFA/LUFA_Events.lst
-	@echo
-	@echo Checking for invalid events...
-	@$(shell) avr-nm $(OBJ) | sed -n -e 's/^.*EVENT_/EVENT_/p' | \
-	  grep -F -v --file=$(LUFA_PATH)/LUFA/LUFA_Events.lst > InvalidEvents.tmp || true
-	@sed -n -e 's/^/  WARNING - INVALID EVENT NAME: /p' InvalidEvents.tmp
-	@if test -s InvalidEvents.tmp; then exit 1; fi
 
 showliboptions:
 	@echo

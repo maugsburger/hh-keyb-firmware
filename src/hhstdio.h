@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <LUFA/Drivers/USB/Class/HID.h>
+#include <LUFA/Drivers/USB/Class/HIDClass.h>
 
 void stdio_init(void);
 void stdio_fill_report(char ch, USB_KeyboardReport_Data_t *report);
