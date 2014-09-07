@@ -148,7 +148,6 @@ int main(void)
     }
     else if (USB_Device_RemoteWakeupEnabled && Keyboard__key_is_down())
     {
-      USB_CLK_Unfreeze();
       USB_Device_SendRemoteWakeup();
     }
     USB_USBTask();
@@ -169,8 +168,6 @@ void SetupHardware()
   /* Hardware Initialization */
   LEDs_Init();
   USB_Init();
-  USB_PLL_On();
-  while (!USB_PLL_IsReady());
 
   /* Task init */
 #ifndef MATRIX_DISCOVERY_MODE
