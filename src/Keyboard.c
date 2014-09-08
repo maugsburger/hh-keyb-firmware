@@ -54,6 +54,9 @@
 #endif
 #include "dbg.h"
 
+#if ARCH==ARCH_XMEGA
+#include <LUFA/Platform/XMEGA/ClockManagement.h>
+#endif
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
@@ -158,11 +161,24 @@ int main(void)
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware()
 {
+#if ARCH==ARCH_XMEGA
+    // Start the PLL to multiply the 2MHz RC oscillator to F_CPU and switch the CPU core to run from it
+    XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
+    XMEGACLK_SetCPUClockSource(CLOCK_SRC_PLL);
+    // Start the 32MHz internal RC oscillator and start the DFLL to increase it to F_USB using the USB SOF as a reference
+    XMEGACLK_StartInternalOscillator(CLOCK_SRC_INT_RC32MHZ);
+    XMEGACLK_StartDFLL(CLOCK_SRC_INT_RC32MHZ, DFLL_REF_INT_USBSOF, F_USB);
+#else
   /* Disable clock division */
   clock_prescale_set(clock_div_2);
+#endif
 
   /* Disable watchdog if enabled by bootloader/fuses */
+#if ARCH==ARCH_XMEGA
+  RST.STATUS &= ~RST_WDRF_bm;
+#else
   MCUSR &= ~(1 << WDRF);
+#endif
   wdt_disable();
 
   /* Hardware Initialization */
