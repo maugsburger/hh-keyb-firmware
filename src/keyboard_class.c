@@ -66,6 +66,7 @@ void
 Keyboard__init()
 {
   stdio_init();
+  init_rows();
   init_cols();
 
   kb.default_keymap  = (KeyMap) pgm_read_word(&default_keymap);

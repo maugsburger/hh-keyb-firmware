@@ -51,9 +51,29 @@ cell_to_index(Cell cell)
 <% end %>
 
 static inline
+void init_rows(void)
+{
+#if ARCH==ARCH_XMEGA
+    /* with xmega, all pins can be permanently input with enabled pullup in
+     * wired-and mode:
+     *  writing 0 to OUT pulls it down to gnd
+     *  writing 1 to OUT leaves it floating, therefore pulled
+     *      high by enabled pullup
+     */
+<% for i,pin in ipairs(kb.row_pins) do %>
+  PORT<%= string.sub(pin,2,2) %>.DIRCLR = <%= string.sub(pin,3,3) %>;
+  PORT<%= string.sub(pin,2,2) %>.OUTSET = PIN<%= string.sub(pin,3,3) %>_bm;
+  PORT<%= string.sub(pin,2,2) %>.PIN<%= string.sub(pin,3,3) %>CTRL= PORT_OPC_WIREDANDPULL_gc;
+<% end %>
+#endif
+}
+
+static inline
 void
 activate_row(uint8_t row)
 {
+#if ARCH==ARCH_XMEGA
+#else
   // set all row pins as inputs
 <% for i,pin in ipairs(kb.row_pins) do %>
   DDR<%= string.sub(pin,2,2) %> &= ~(1 << <%= pin %>);
@@ -66,18 +86,31 @@ activate_row(uint8_t row)
     case <%= i-1 %>: DDR<%= string.sub(pin,2,2) %> |= (1 << <%= pin %>); break;
 <% end %>
   }
+#endif
 
-  // drive all row pins high
+  // drive all row pins high (pullup)
+#if ARCH==ARCH_XMEGA
+<% for i,pin in ipairs(kb.row_pins) do %>
+  PORT<%= string.sub(pin,2,2) %>.OUTSET = PIN<%= string.sub(pin,3,3) %>_bm;
+<% end %>
+#else
 <% for i,pin in ipairs(kb.row_pins) do %>
   PORT<%= string.sub(pin,2,2) %> |= (1 << <%= pin %>);
 <% end %>
+#endif
 
-  // drive current row pin low
+  // drive current row pin low (no pullup)
   switch (row)
   {
+#if ARCH==ARCH_XMEGA
+<% for i,pin in ipairs(kb.row_pins) do %>
+    case <%= i-1 %>: PORT<%= string.sub(pin,2,2) %>.OUTCLR = PIN<%= string.sub(pin,3,3) %>_bm; break;
+<% end %>
+#else
 <% for i,pin in ipairs(kb.row_pins) do %>
     case <%= i-1 %>: PORT<%= string.sub(pin,2,2) %> &= ~(1 << <%= pin %>); break;
 <% end %>
+#endif
   }
 }
 
@@ -87,9 +120,15 @@ read_row_data(void)
 {
   uint32_t cols = 0;
 
+#if ARCH==ARCH_XMEGA
+<% for i,pin in ipairs(kb.col_pins) do %>
+  if ((~PORT<%= string.sub(pin,2,2) %>.IN)&(PIN<%= string.sub(pin,3,3) %>_bm)) cols |= (1UL<< <%= i-1 %>);
+<% end %>
+#else
 <% for i,pin in ipairs(kb.col_pins) do %>
   if ((~PIN<%= string.sub(pin,2,2) %>)&(1<<<%= pin %>)) cols |= (1UL<< <%= i-1 %>);
 <% end %>
+#endif
 
   return cols;
 }
@@ -100,14 +139,20 @@ void
 init_cols(void)
 {
   /* Columns are inputs */
+#if ARCH==ARCH_XMEGA
+#else
 <% for i,pin in ipairs(kb.col_pins) do %>
   DDR<%= string.sub(pin,2,2) %> &= ~(1 << <%= pin %>);
 <% end %>
+#endif
 
   /* Enable pull-up resistors on inputs */
+#if ARCH==ARCH_XMEGA
+#else
 <% for i,pin in ipairs(kb.col_pins) do %>
   PORT<%= string.sub(pin,2,2) %> |= (1 << <%= pin %>);
 <% end %>
+#endif
 }
 
 #endif /* __MATRIX_H__ */

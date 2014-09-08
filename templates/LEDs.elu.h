@@ -102,11 +102,23 @@
       pin  = string.sub(led.pin,3,3)
       name = 'LED_' .. string.upper(led.name) %>
            // <%=name%>
+#if ARCH==ARCH_XMEGA
+           PORT<%=port%>.DIRSET = PIN<%=pin%>_bm; // set pin as output
+#else
            DDR<%=port%> |= (1<<<%=pin%>); // set pin as output
+#endif
 <%    if led.flow == 'sink' then %>
+#if ARCH==ARCH_XMEGA
+           PORT<%=port%>.OUTSET = PIN<%=pin%>_bm; // set pin high to prevent sinking (led off)
+#else
            PORT<%=port%> |= (1<<<%=pin%>); // set pin high to prevent sinking (led off)
+#endif
 <%    else %>
+#if ARCH==ARCH_XMEGA
+           PORT<%=port%>.OUTCLR = PIN<%=pin%>_bm; // set pin low (led off)
+#else
            PORT<%=port%> &= ~(1<<<%=pin%>); // set pin low (led off)
+#endif
 <%    end
     end %>
 			}
@@ -119,9 +131,17 @@
       name = 'LED_' .. string.upper(led.name) %>
            if (LEDMask & <%=name%>)
 <%    if led.flow == 'sink' then %>
+#if ARCH==ARCH_XMEGA
+             <%=port%>.OUTCLR = PIN<%=pin%>_bm;
+#else
              <%=port%> &= ~(1<<<%=pin%>);
+#endif
 <%    else %>
+#if ARCH==ARCH_XMEGA
+             <%=port%>.OUTSET = PIN<%=pin%>_bm;
+#else
              <%=port%> |= (1<<<%=pin%>);
+#endif
 <%    end
     end %>
 			}
@@ -134,9 +154,17 @@
       name = 'LED_' .. string.upper(led.name) %>
            if (LEDMask & <%=name%>)
 <%    if led.flow == 'sink' then %>
+#if ARCH==ARCH_XMEGA
+             <%=port%>.OUTSET = PIN<%=pin%>_bm;
+#else
              <%=port%> |= (1<<<%=pin%>);
+#endif
 <%    else %>
+#if ARCH==ARCH_XMEGA
+             <%=port%>.OUTCLR = PIN<%=pin%>_bm;
+#else
              <%=port%> &= ~(1<<<%=pin%>);
+#endif
 <%    end
     end %>
 			}
@@ -160,7 +188,11 @@
       pin  = string.sub(led.pin,3,3)
       name = 'LED_' .. string.upper(led.name) %>
            if (LEDMask & <%=name%>)
+#if ARCH==ARCH_XMEGA
+             <%=port%>.OUTTGL = PIN<%=pin%>_bm;
+#else
              <%=port%> ^= ~(1<<<%=pin%>);
+#endif
 <% end %>
 			}
 
@@ -173,9 +205,17 @@
       pin  = string.sub(led.pin,3,3)
       name = 'LED_' .. string.upper(led.name) %>
 <%    if led.flow == 'sink' then %>
+#if ARCH==ARCH_XMEGA
+           if ((<%=port%>_OUT & ~(1<<<%=pin%>)) == <%=port%>_OUT)
+#else
            if ((<%=port%> & ~(1<<<%=pin%>)) == <%=port%>)
+#endif
 <%    else %>
+#if ARCH==ARCH_XMEGA
+           if ((<%=port%>_OUT & (1<<<%=pin%>)) == <%=port%>_OUT)
+#else
            if ((<%=port%> & (1<<<%=pin%>)) == <%=port%>)
+#endif
 <%    end %>
              result |= <%=name%>;
 <%  end %>
